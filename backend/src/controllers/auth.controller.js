@@ -13,7 +13,13 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
     try {
         const result = await authService.login(req.body);
-        successResponse(res, 200, 'Login successful', result);
+        res.cookie('refreshToken', result.refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: Number(process.env.REFRESH_TOKEN_TTL_DAYS || 7) * 24 * 60 * 60 * 1000
+        });
+        successResponse(res, 200, 'Login successful', { accessToken: result.accessToken, user: result.user });
     } catch (error) {
         next(error);
     }
@@ -28,8 +34,39 @@ export const me = async (req, res, next) => {
     }
 };
 
-export const logout = async (req, res) => {
-    successResponse(res, 200, 'Logout successful. Discard the JWT on the client; this stateless JWT cannot be revoked server-side until it expires.', {});
+export const logout = async (req, res, next) => {
+    try {
+        await authService.revokeRefreshToken(req.cookies?.refreshToken);
+        await authService.revokeAllRefreshTokens(req.user.id);
+        res.clearCookie('refreshToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
+        successResponse(res, 200, 'Logout successful', {});
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const refresh = async (req, res, next) => {
+    try {
+        const result = await authService.refreshAccessToken(req.cookies?.refreshToken);
+        res.cookie('refreshToken', result.refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: Number(process.env.REFRESH_TOKEN_TTL_DAYS || 7) * 24 * 60 * 60 * 1000
+        });
+        successResponse(res, 200, 'Access token refreshed', { accessToken: result.accessToken, user: result.user });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const activateStaff = async (req, res, next) => {
+    try {
+        await authService.activateStaff(req.body.token, req.body.password);
+        successResponse(res, 200, 'Staff account activated successfully', {});
+    } catch (error) {
+        next(error);
+    }
 };
 
 export const forgotPassword = async (req, res, next) => {

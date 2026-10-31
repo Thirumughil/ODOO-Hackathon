@@ -10,6 +10,19 @@ const transporter = process.env.SMTP_HOST ? nodemailer.createTransport({
     } : undefined
 }) : null;
 
+export const sendStaffInvitationEmail = async (email, token) => {
+    if (!transporter) throw new Error('SMTP service is not configured');
+    const baseUrl = process.env.STAFF_ACTIVATION_URL || process.env.FRONTEND_URL;
+    const activationLink = `${baseUrl}?token=${encodeURIComponent(token)}`;
+    await transporter.sendMail({
+        from: process.env.SMTP_FROM || 'SubscriptIQ <no-reply@example.com>',
+        to: email,
+        subject: 'Activate your SubscriptIQ staff account',
+        text: `Use this link to activate your staff account: ${activationLink}\nThe link expires soon.`,
+        html: `<p>Use this link to activate your staff account:</p><p><a href="${activationLink}">Activate staff account</a></p>`
+    });
+};
+
 export const sendPasswordResetEmail = async (email, token) => {
     if (!transporter) {
         throw new Error('SMTP service is not configured');

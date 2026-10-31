@@ -28,7 +28,11 @@ export const resetPasswordSchema = z.object({
 
 export const createStaffSchema = z.object({
     name: z.string().trim().min(1).max(100),
-    email: z.string().trim().email().max(255).transform((value) => value.toLowerCase()),
+    email: z.string().trim().email().max(255).transform((value) => value.toLowerCase())
+}).strict();
+
+export const activateStaffSchema = z.object({
+    token: z.string().trim().min(32).max(128),
     password: passwordRule
 }).strict();
 
