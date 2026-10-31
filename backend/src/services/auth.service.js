@@ -51,7 +51,7 @@ export const login = async ({ email, password }) => {
         { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || process.env.JWT_EXPIRES_IN || '15m' }
     );
 
-    const refreshToken = generateResetToken().replace(/[^a-zA-Z0-9]/g, '') + generateResetToken().replace(/[^a-zA-Z0-9]/g, '')
+    const refreshToken = generateResetToken();
     const refreshTokenHash = hashResetToken(refreshToken);
     const refreshDays = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 7);
     await pool.execute(`

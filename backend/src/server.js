@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { testDatabaseConnection } from './config/db.js';
 
-const requiredEnvironment = ['JWT_SECRET', 'REFRESH_TOKEN_SECRET', 'DB_HOST', 'DB_USER', 'DB_NAME'];
+const requiredEnvironment = ['JWT_SECRET', 'DB_HOST', 'DB_USER', 'DB_NAME'];
 const missing = requiredEnvironment.filter((key) => !process.env[key]);
 if (missing.length) {
     console.error(`Missing required environment variables: ${missing.join(', ')}`);
