@@ -1,14 +1,24 @@
 import nodemailer from 'nodemailer';
 
-const transporter = process.env.SMTP_HOST ? nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: process.env.SMTP_USER ? {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-    } : undefined
-}) : null;
+const createTransporter = () => {
+    if (process.env.NODE_ENV === 'test') {
+        return nodemailer.createTransport({ jsonTransport: true });
+    }
+    if (process.env.SMTP_HOST) {
+        return nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT || 587),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: process.env.SMTP_USER ? {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            } : undefined
+        });
+    }
+    return null;
+};
+
+const transporter = createTransporter();
 
 export const sendStaffInvitationEmail = async (email, token) => {
     if (!transporter) throw new Error('SMTP service is not configured');

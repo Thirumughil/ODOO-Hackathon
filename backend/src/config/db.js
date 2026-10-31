@@ -1,5 +1,19 @@
 import mysql from 'mysql2/promise';
 
+export const validateDatabaseName = (...args) => {
+    const env = args.length > 0 && args[0] !== undefined ? args[0] : process.env.NODE_ENV;
+    const dbName = args.length > 1 ? args[1] : process.env.DB_NAME;
+    if (env === 'test') {
+        if (!dbName || typeof dbName !== 'string' || !dbName.endsWith('_test')) {
+            throw new Error(
+                `Refusing to connect: in test mode (NODE_ENV=test), DB_NAME must be a non-empty string ending with '_test'. Received: '${dbName || ''}'.`
+            );
+        }
+    }
+};
+
+validateDatabaseName();
+
 export const pool = mysql.createPool({
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT || 3306),
