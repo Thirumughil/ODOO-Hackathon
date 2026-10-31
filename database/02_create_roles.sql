@@ -1,0 +1,12 @@
+USE subscriptiq;
+
+CREATE TABLE IF NOT EXISTS roles (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    role_name VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+INSERT INTO roles (id, role_name) VALUES
+    (1, 'ADMIN'),
+    (2, 'STAFF'),
+    (3, 'CUSTOMER')
+ON DUPLICATE KEY UPDATE role_name = VALUES(role_name);
